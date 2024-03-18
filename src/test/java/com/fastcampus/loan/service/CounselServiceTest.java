@@ -87,4 +87,28 @@ public class CounselServiceTest {
         Assertions.assertThrows(BaseException.class, ()-> counselService.get(findId));
 
     }
+
+    @Test
+    void 업데이트_요청이_들어오면_존재하는_상담엔티티의_업데이트_된_응답리턴(){
+        Long findId = 1L;
+        Counsel entity = Counsel.builder()
+                .counselId(1L)
+                .name("Member Kim")
+                .build();
+
+        CounselDTO.Request request = CounselDTO.Request.builder()
+                .name("Member Kang")
+                .build();
+
+        // 어떤 값이 있는 오브젝트가 들어오면 entity 리턴하게 처리
+        when(counselRepository.save(ArgumentMatchers.any(Counsel.class))).thenReturn(entity);
+        when(counselRepository.findById(findId)).thenReturn(Optional.ofNullable(entity));
+
+
+        CounselDTO.Response actual = counselService.update(findId, request);
+        assertThat(actual.getCounselId()).isSameAs(findId);
+        assertThat(actual.getName()).isSameAs(request.getName());
+
+
+    }
 }

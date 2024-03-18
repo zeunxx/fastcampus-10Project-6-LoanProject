@@ -12,4 +12,6 @@ public interface CounselService {
     Response get(Long counselId);
 
     Response update(Long counselId, Request request);
+
+    void delete(Long counselId);
 }

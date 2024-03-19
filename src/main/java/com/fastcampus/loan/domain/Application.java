@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 public class Application extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, updatable = false)
     private Long applicationId;
 
     @Column(columnDefinition = "varchar(12) DEFAULT NULL COMMENT '신청자'")

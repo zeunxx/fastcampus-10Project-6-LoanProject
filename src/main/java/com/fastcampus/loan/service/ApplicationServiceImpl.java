@@ -34,4 +34,26 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         return modelMapper.map(application, ApplicationDTO.Response.class);
     }
+
+    @Override
+    public ApplicationDTO.Response update(Long applicationId, ApplicationDTO.Request request) {
+        Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        application.setName(request.getName());
+        application.setCellPhone(request.getCellPhone());
+        application.setEmail(request.getEmail());
+        application.setHopeAmount(request.getHopeAmount());
+
+        applicationRepository.save(application);
+
+        return modelMapper.map(application, ApplicationDTO.Response.class);
+    }
+
+    @Override
+    public void delete(Long applicationId) {
+        Application application = applicationRepository.findById(applicationId).orElseThrow(() -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        application.setIsDeleted(true);
+        applicationRepository.save(application);
+    }
 }

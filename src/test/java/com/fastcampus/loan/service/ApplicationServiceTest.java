@@ -60,9 +60,51 @@ public class ApplicationServiceTest {
                 .applicationId(1L)
                 .build();
 
-        when(applicationRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(applicationRepository.findById(findId)).thenReturn(Optional.of(entity));
         ApplicationDTO.Response actual = applicationService.get(findId);
 
         Assertions.assertThat(actual.getApplicationId()).isSameAs(entity.getApplicationId());
+    }
+
+    @Test
+    void 존재하는_엔티티에_대한_업데이트요청시_해당엔티티_업데이트된_응답리턴(){
+
+        Long findId = 1L;
+
+        Application entity = Application.builder()
+                .applicationId(1L)
+                .hopeAmount(BigDecimal.valueOf(50000000))
+                .build();
+
+        ApplicationDTO.Request request = ApplicationDTO.Request.builder()
+                .hopeAmount(BigDecimal.valueOf(5000000))
+                .build();
+
+        when(applicationRepository.save(ArgumentMatchers.any(Application.class))).thenReturn(entity);
+        when(applicationRepository.findById(findId)).thenReturn(Optional.of(entity));
+
+        ApplicationDTO.Response actual = applicationService.update(findId, request);
+
+        Assertions.assertThat(actual.getApplicationId()).isSameAs(findId);
+        Assertions.assertThat(actual.getHopeAmount()).isSameAs(request.getHopeAmount());
+
+    }
+
+
+    @Test
+    void 존재하는엔티티_삭제요청시_엔티티삭제(){
+        Long targetId = 1L;
+
+        Application entity = Application.builder()
+                .applicationId(1L)
+                .build();
+
+
+        when(applicationRepository.save(ArgumentMatchers.any(Application.class))).thenReturn(entity);
+        when(applicationRepository.findById(targetId)).thenReturn(Optional.of(entity));
+
+        applicationService.delete(targetId);
+
+        Assertions.assertThat(entity.getIsDeleted()).isSameAs(true);
     }
 }

@@ -13,6 +13,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,5 +50,25 @@ public class TermsServiceTest {
 
         Assertions.assertThat(actual.getName()).isSameAs(entity.getName());
         Assertions.assertThat(actual.getTermsDetailUrl()).isSameAs(entity.getTermsDetailUrl());
+    }
+
+    @Test
+    void 약관리스트_요청시_존재하는_모든약관리턴(){
+        Terms entityA = Terms.builder()
+                .name("대출 이용약관 1")
+                .termsDetailUrl("https://test.com/test1")
+                .build();
+        Terms entityB = Terms.builder()
+                .name("대출 이용약관 2")
+                .termsDetailUrl("https://test.com/test2")
+                .build();
+
+        List<Terms> list = new ArrayList<>(Arrays.asList(entityA, entityB));
+
+        when(termsRepository.findAll()).thenReturn(list);
+
+        List<TermsDTO.Response> actual = termsService.getAll();
+
+        Assertions.assertThat(actual.size()).isSameAs(list.size());
     }
 }

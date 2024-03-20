@@ -15,19 +15,18 @@ import javax.persistence.*;
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Where(clause="is_deleted=false") // soft delete를 위한 어노테이션
-public class Terms extends BaseEntity{
-
+public class AcceptTerms {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
+    private Long acceptTermsId;
+
+
+    @Column(columnDefinition = "bigint NOT NULL COMMENT '신청 ID'")
+    private Long applicationId;
+
+    @Column(columnDefinition = "bigint NOT NULL COMMENT '약관 ID'")
     private Long termsId;
-
-    @Column(columnDefinition = "varchar(255) NOT NULL COMMENT '약관'")
-    private String name;
-
-    @Column(columnDefinition = "varchar(255) NOT NULL COMMENT '약관상세 URL'")
-    private String termsDetailUrl;
 
 }

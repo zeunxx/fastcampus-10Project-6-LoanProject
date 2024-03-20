@@ -1,8 +1,14 @@
 package com.fastcampus.loan.service;
 
+import com.fastcampus.loan.domain.AcceptTerms;
 import com.fastcampus.loan.domain.Application;
+import com.fastcampus.loan.domain.BaseEntity;
+import com.fastcampus.loan.domain.Terms;
 import com.fastcampus.loan.dto.ApplicationDTO;
+import com.fastcampus.loan.exception.BaseException;
+import com.fastcampus.loan.repository.AcceptTermsRepository;
 import com.fastcampus.loan.repository.ApplicationRepository;
+import com.fastcampus.loan.repository.TermsRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +18,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
@@ -26,6 +35,12 @@ public class ApplicationServiceTest {
 
     @Mock
     private ApplicationRepository applicationRepository;
+
+    @Mock
+    private TermsRepository termsRepository;
+
+    @Mock
+    AcceptTermsRepository acceptTermsRepository;
 
     @Spy
     private ModelMapper modelMapper;
@@ -106,5 +121,105 @@ public class ApplicationServiceTest {
         applicationService.delete(targetId);
 
         Assertions.assertThat(entity.getIsDeleted()).isSameAs(true);
+    }
+
+    @Test
+    void 신청정보의_약관동의요청시_약관추가(){
+        Terms terms1 = Terms.builder()
+                .termsId(1L)
+                .name("약관1")
+                .termsDetailUrl("test")
+                .build();
+
+        Terms terms2 = Terms.builder()
+                .termsId(2L)
+                .name("약관2")
+                .termsDetailUrl("test")
+                .build();
+
+        // 고객이 동의한 약관
+        List<Long> acceptTerms = Arrays.asList(1L, 2L);
+
+        ApplicationDTO.AcceptTermsDTO request = ApplicationDTO.AcceptTermsDTO.builder()
+                .acceptTermsIds(acceptTerms)
+                .build();
+
+        // 대출신정정보 1번
+        Long findId = 1L;
+
+
+        when(applicationRepository.findById(findId)).thenReturn(Optional.ofNullable(Application.builder().build()));
+        when(termsRepository.findAll(Sort.by(Sort.Direction.ASC,"termsId"))).thenReturn(Arrays.asList(terms1, terms2));
+        when(acceptTermsRepository.save(ArgumentMatchers.any(AcceptTerms.class))).thenReturn(AcceptTerms.builder().build());
+
+        Boolean actual = applicationService.acceptTerms(findId, request);
+
+        Assertions.assertThat(actual).isTrue();
+
+    }
+
+
+    @Test
+    void 모든약관동의_하지않으면_예외발생(){
+        Terms terms1 = Terms.builder()
+                .termsId(1L)
+                .name("약관1")
+                .termsDetailUrl("test")
+                .build();
+
+        Terms terms2 = Terms.builder()
+                .termsId(2L)
+                .name("약관2")
+                .termsDetailUrl("test")
+                .build();
+
+        // 고객이 동의한 약관
+        List<Long> acceptTerms = Arrays.asList(1L);
+
+        ApplicationDTO.AcceptTermsDTO request = ApplicationDTO.AcceptTermsDTO.builder()
+                .acceptTermsIds(acceptTerms)
+                .build();
+
+        // 대출신정정보 1번
+        Long findId = 1L;
+
+
+        when(applicationRepository.findById(findId)).thenReturn(Optional.ofNullable(Application.builder().build()));
+        when(termsRepository.findAll(Sort.by(Sort.Direction.ASC,"termsId"))).thenReturn(Arrays.asList(terms1, terms2));
+
+        org.junit.jupiter.api.Assertions.assertThrows(BaseException.class, () ->  applicationService.acceptTerms(findId, request));
+
+    }
+
+    @Test
+    void 존재하지않는_약관_동의하면_예외발생(){
+        Terms terms1 = Terms.builder()
+                .termsId(1L)
+                .name("약관1")
+                .termsDetailUrl("test")
+                .build();
+
+        Terms terms2 = Terms.builder()
+                .termsId(2L)
+                .name("약관2")
+                .termsDetailUrl("test")
+                .build();
+
+        // 고객이 동의한 약관
+        List<Long> acceptTerms = Arrays.asList(1L,3L);
+
+        ApplicationDTO.AcceptTermsDTO request = ApplicationDTO.AcceptTermsDTO.builder()
+                .acceptTermsIds(acceptTerms)
+                .build();
+
+        // 대출신정정보 1번
+        Long findId = 1L;
+
+
+        when(applicationRepository.findById(findId)).thenReturn(Optional.ofNullable(Application.builder().build()));
+        when(termsRepository.findAll(Sort.by(Sort.Direction.ASC,"termsId"))).thenReturn(Arrays.asList(terms1, terms2));
+
+        org.junit.jupiter.api.Assertions.assertThrows(BaseException.class, () ->  applicationService.acceptTerms(findId, request));
+
     }
 }

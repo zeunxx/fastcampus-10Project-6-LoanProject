@@ -1,10 +1,23 @@
 package com.fastcampus.loan.controller;
 
 import com.fastcampus.loan.dto.ApplicationDTO;
+import com.fastcampus.loan.dto.FileDTO;
 import com.fastcampus.loan.dto.ResponseDTO;
 import com.fastcampus.loan.service.ApplicationService;
+import com.fastcampus.loan.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @RestController
@@ -12,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApplicationController extends AbstractController{
 
     private final ApplicationService applicationService;
+    private final FileStorageService fileStorageService;
 
     @PostMapping
     public ResponseDTO<ApplicationDTO.Response> crate(@RequestBody ApplicationDTO.Request request){
@@ -38,4 +52,38 @@ public class ApplicationController extends AbstractController{
     public ResponseDTO<Boolean> acceptTerms(@PathVariable Long applicationId, @RequestBody ApplicationDTO.AcceptTermsDTO request){
         return ok(applicationService.acceptTerms(applicationId, request));
     }
+
+    @PostMapping("/files")
+    public ResponseDTO<Void> upload(MultipartFile file){
+        fileStorageService.save(file);
+        return ok();
+    }
+
+    @GetMapping("/files")
+    public ResponseEntity<Resource> download(@RequestParam String fileName){
+        Resource file = fileStorageService.load(fileName);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\""+file.getFilename()+ "\"")
+                .body(file);
+    }
+
+    @GetMapping("/files/infos")
+    public ResponseDTO<List<FileDTO>> getFilesInfos(){
+        List<FileDTO> fileDTOS = fileStorageService.loadAll().map(path -> {
+            String fileName = path.getFileName().toString();
+            return FileDTO.builder()
+                    .name(fileName)
+                    // 위의 download 메소드 사용
+                    .url(MvcUriComponentsBuilder.fromMethodName(ApplicationController.class, "download", fileName).build().toString()) // MVC URI component builder 사용
+                    .build();
+        }).toList();
+        return ok(fileDTOS);
+    }
+
+    @DeleteMapping("files")
+    public ResponseDTO<Void> deleteAll(){
+        fileStorageService.deleteAll();
+        return ok();
+    }
+
 }

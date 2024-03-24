@@ -11,6 +11,7 @@ public interface ApplicationService {
     void delete(Long applicationId);
     Boolean acceptTerms(Long applicationId, ApplicationDTO.AcceptTermsDTO request);
 
+    ApplicationDTO.Response contract(Long applicationId);
 
 
 }

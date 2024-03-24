@@ -3,18 +3,21 @@ package com.fastcampus.loan.service;
 
 import com.fastcampus.loan.domain.AcceptTerms;
 import com.fastcampus.loan.domain.Application;
+import com.fastcampus.loan.domain.Judgement;
 import com.fastcampus.loan.domain.Terms;
 import com.fastcampus.loan.dto.ApplicationDTO;
 import com.fastcampus.loan.exception.BaseException;
 import com.fastcampus.loan.exception.ResultType;
 import com.fastcampus.loan.repository.AcceptTermsRepository;
 import com.fastcampus.loan.repository.ApplicationRepository;
+import com.fastcampus.loan.repository.JudgementRepository;
 import com.fastcampus.loan.repository.TermsRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +31,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final TermsRepository termsRepository;
     private final AcceptTermsRepository acceptTermsRepository;
+    private final JudgementRepository judgementRepository;
 
     private final ModelMapper modelMapper;
 
@@ -111,8 +115,29 @@ public class ApplicationServiceImpl implements ApplicationService {
 
             acceptTermsRepository.save(accepted);
         }
-
         return true;
+    }
 
+    @Override
+    public ApplicationDTO.Response contract(Long applicationId) {
+
+        // 신청 정보 있는지
+        Application application = applicationRepository.findById(applicationId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+        // 심사 정보 있는지
+        Judgement judgement = judgementRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+        // 승인 금액 > 0 (grant 에서 부여한 금액, 승인거절시 0원 부여)
+        if(application.getApprovalAmount()==null
+                || application.getApprovalAmount().compareTo(BigDecimal.ZERO)==0){
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        }
+        // 계약 체결
+        application.setContractedAt(now());
+        applicationRepository.save(application);
+
+        return null;
     }
 }

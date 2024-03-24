@@ -50,4 +50,7 @@ public class Application extends BaseEntity {
 
     @Column(columnDefinition = "decimal(15,2) DEFAULT NULL COMMENT '승인 금액'")
     private BigDecimal approvalAmount; // 승인 금액
+
+    @Column(columnDefinition = "datetime DEFAULT NULL COMMENT '계약 날짜'")
+    private LocalDateTime contractedAt; // 계약 날짜
 }

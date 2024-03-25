@@ -17,20 +17,17 @@ import java.math.BigDecimal;
 @DynamicInsert
 @DynamicUpdate
 @Where(clause="is_deleted=false") // soft delete를 위한 어노테이션
-public class Judgement extends BaseEntity{
+public class Repayment extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false)
-    private Long judgementId;
+    private Long repaymentId;
 
     @Column(columnDefinition = "bigint NOT NULL COMMENT '신청 ID'")
     private Long applicationId;
 
-    @Column(columnDefinition = "varchar(12) NOT NULL COMMENT '심사자'")
-    private String name;
-
-    @Column(columnDefinition = "decimal(15,2) NOT NULL COMMENT '승인 금액'")
-    private BigDecimal approvalAmount;
-
+    @Column(columnDefinition = "decimal(15,2) NOT NULL COMMENT '상환 금액'")
+    private BigDecimal repaymentAmount;
 
 }

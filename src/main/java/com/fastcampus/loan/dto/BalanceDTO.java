@@ -33,6 +33,22 @@ public class BalanceDTO implements Serializable {
     @Getter
     @Builder
     @Setter
+    public static class RepaymentRequest{
+        public enum RepaymentType{
+            ADD,
+            REMOVE
+        }
+
+        private RepaymentType repaymentType;
+        private BigDecimal repaymentAmount;
+    }
+
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    @Setter
     public static class Response{
         private Long balanceId;
         private Long applicationId;

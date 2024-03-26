@@ -2,6 +2,7 @@ package com.fastcampus.loan.service;
 
 import com.fastcampus.loan.domain.Balance;
 import com.fastcampus.loan.dto.BalanceDTO;
+import com.fastcampus.loan.dto.RepaymentDTO;
 import com.fastcampus.loan.exception.BaseException;
 import com.fastcampus.loan.exception.ResultType;
 import com.fastcampus.loan.repository.BalanceRepository;
@@ -59,5 +60,28 @@ public class BalanceServiceImpl implements BalanceService{
          balanceRepository.save(balance);
 
         return modelMapper.map(balance, BalanceDTO.Response.class);
+    }
+
+    @Override
+    public BalanceDTO.Response repaymentUpdate(Long applicationId, BalanceDTO.RepaymentRequest request) {
+        Balance balance = balanceRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        });
+
+        BigDecimal updatedBalance = balance.getBalance();
+        BigDecimal repaymentAmount = request.getRepaymentAmount();
+
+        // 상환 정상: balance - repayment
+        // 상환금 롤백 : balance + repayment
+        if (request.getRepaymentType().equals(BalanceDTO.RepaymentRequest.RepaymentType.ADD)){
+            updatedBalance = updatedBalance.add(repaymentAmount);
+        }else{
+            updatedBalance = updatedBalance.subtract(repaymentAmount);
+        }
+
+        balance.setBalance(updatedBalance);
+        Balance updated = balanceRepository.save(balance);
+        return modelMapper.map(updated, BalanceDTO.Response.class);
+
     }
 }

@@ -76,7 +76,7 @@ public class ApplicationController extends AbstractController{
                     // 위의 download 메소드 사용
                     .url(MvcUriComponentsBuilder.fromMethodName(ApplicationController.class, "download",applicationId ,fileName).build().toString()) // MVC URI component builder 사용
                     .build();
-        }).toList();
+        }).collect(Collectors.toList());
         return ok(fileDTOS);
     }
 

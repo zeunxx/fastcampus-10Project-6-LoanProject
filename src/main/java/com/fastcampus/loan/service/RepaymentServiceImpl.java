@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +61,7 @@ public class RepaymentServiceImpl implements RepaymentService{
     public List<RepaymentDTO.ListResponse> get(Long applicationId) {
         List<Repayment> repaymentList = repaymentRepository.findAllByApplicationId(applicationId);
 
-        return repaymentList.stream().map( r -> modelMapper.map(r, RepaymentDTO.ListResponse.class)).toList();
+        return repaymentList.stream().map( r -> modelMapper.map(r, RepaymentDTO.ListResponse.class)).collect(Collectors.toList());
     }
 
     @Override

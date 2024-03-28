@@ -95,7 +95,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new BaseException(ResultType.SYSTEM_ERROR);
         }
 
-        List<Long> termsIds = termsList.stream().map(Terms::getTermsId).toList();
+        List<Long> termsIds = termsList.stream().map(Terms::getTermsId).collect(Collectors.toList());
         Collections.sort(acceptTermsIds); // 정렬
 
         // 고객이 동의한 약관이 우리가 가지고 있는 약관인지 확인
